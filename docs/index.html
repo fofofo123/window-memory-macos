@@ -1,0 +1,620 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="window-memory — Installation guide on macOS via Terminal (Homebrew)." />
+  <title>window-memory — Installation Guide</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    /* GitHub-like primitives — light / dark via variables */
+    :root {
+      --canvas-default: #ffffff;
+      --canvas-subtle: #f6f8fa;
+      --border-default: #d0d7de;
+      --fg-default: #1f2328;
+      --fg-muted: #656d76;
+      --accent-fg: #0969da;
+      --accent-emphasis: #0550ae;
+      --success-fg: #1a7f37;
+      --success-muted: #dafbe1;
+      --success-border: #4ac26b66;
+      --code-bg: #f6f8fa;
+      --code-text: #24292f;
+      --note-bg: #ddf4ff;
+      --btn-active-bg: #eaeef2;
+      --btn-copied-hover-bg: #cae9cf;
+      --dots-neutral: #d0d7de;
+      --kbd-shadow: inset 0 -1px 0 rgba(175, 184, 193, 0.2);
+      --radius: 6px;
+      --radius-lg: 12px;
+      --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans", Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji";
+      --font-mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+    }
+
+    html { color-scheme: light; }
+
+    @media (prefers-color-scheme: dark) {
+      html { color-scheme: dark; }
+
+      :root {
+        --canvas-default: #0d1117;
+        --canvas-subtle: #161b22;
+        --border-default: #30363d;
+        --fg-default: #e6edf3;
+        --fg-muted: #8b949e;
+        --accent-fg: #58a6ff;
+        --accent-emphasis: #79c0ff;
+        --success-fg: #3fb950;
+        --success-muted: rgba(46, 160, 67, 0.18);
+        --success-border: rgba(63, 185, 80, 0.45);
+        --code-bg: #161b22;
+        --code-text: #e6edf3;
+        --note-bg: rgba(56, 139, 253, 0.15);
+        --btn-active-bg: #21262d;
+        --btn-copied-hover-bg: rgba(46, 160, 67, 0.22);
+        --dots-neutral: #484f58;
+        --kbd-shadow: inset 0 -1px 0 rgba(110, 118, 129, 0.35);
+      }
+
+      /* Hero illustration — readable on dark canvas */
+      .hero-icon svg rect:first-of-type {
+        stroke: #8b949e;
+      }
+
+      .hero-icon svg rect:nth-of-type(2),
+      .hero-icon svg rect:nth-of-type(3) {
+        fill: rgba(88, 166, 255, 0.18);
+        stroke: #58a6ff;
+      }
+
+      .hero-icon svg path:first-of-type {
+        stroke: #8b949e;
+      }
+
+      .hero-icon svg circle {
+        fill: #238636;
+      }
+
+      .dots span:nth-child(1) { background: #ff7b72; }
+      .dots span:nth-child(2) { background: #d29922; }
+      .dots span:nth-child(3) { background: #3fb950; }
+    }
+
+    body {
+      font-family: var(--font-sans);
+      background: var(--canvas-subtle);
+      color: var(--fg-default);
+      font-size: 14px;
+      line-height: 1.5;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    strong { font-weight: 600; }
+
+    /* HERO — repo title bar feel */
+    .hero {
+      background: var(--canvas-default);
+      border-bottom: 1px solid var(--border-default);
+      padding: 2rem 1.25rem 1.75rem;
+      text-align: center;
+    }
+
+    .hero-icon {
+      width: 64px;
+      height: 64px;
+      margin: 0 auto 1rem;
+      background: var(--canvas-subtle);
+      border: 1px solid var(--border-default);
+      border-radius: var(--radius-lg);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+
+    .hero-icon svg,
+    .hero-icon img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .hero h1 {
+      font-size: 1.5rem;
+      font-weight: 600;
+      letter-spacing: -0.02em;
+      margin-bottom: 0.35rem;
+      color: var(--fg-default);
+    }
+
+    .hero-tagline {
+      font-size: 0.8125rem;
+      color: var(--fg-muted);
+      font-family: var(--font-mono);
+    }
+
+    /* WRAP */
+    .wrap {
+      max-width: 720px;
+      margin: 0 auto;
+      padding: 1.5rem 1rem 3rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    /* PANEL — issue / README card */
+    .panel {
+      background: var(--canvas-default);
+      border: 1px solid var(--border-default);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+    }
+
+    .panel-head {
+      padding: 0.875rem 1rem;
+      border-bottom: 1px solid var(--border-default);
+      background: var(--canvas-default);
+    }
+
+    .panel-head h2 {
+      font-size: 0.875rem;
+      font-weight: 600;
+      color: var(--fg-default);
+    }
+
+    .panel-head p {
+      font-size: 0.75rem;
+      color: var(--fg-muted);
+      margin-top: 0.25rem;
+    }
+
+    .panel-body {
+      padding: 1rem;
+    }
+
+    /* STEPS */
+    .steps {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+    }
+
+    .step {
+      display: flex;
+      gap: 0.75rem;
+      align-items: flex-start;
+    }
+
+    .step-num {
+      flex-shrink: 0;
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      background: var(--canvas-subtle);
+      border: 1px solid var(--border-default);
+      font-family: var(--font-mono);
+      font-size: 0.6875rem;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--fg-muted);
+      margin-top: 2px;
+    }
+
+    .step-num.cmd {
+      font-size: 0.8125rem;
+      color: var(--fg-default);
+      font-weight: 500;
+    }
+
+    .step-num.done {
+      background: var(--success-muted);
+      border-color: var(--success-border);
+      color: var(--success-fg);
+    }
+
+    .step h3 {
+      font-size: 0.875rem;
+      font-weight: 600;
+      margin-bottom: 0.35rem;
+      color: var(--fg-default);
+    }
+
+    .step p {
+      font-size: 0.8125rem;
+      color: var(--fg-muted);
+      line-height: 1.55;
+    }
+
+    kbd {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--font-mono);
+      font-size: 0.6875rem;
+      font-weight: 500;
+      background-color: var(--canvas-subtle);
+      border: 1px solid var(--border-default);
+      border-radius: var(--radius);
+      padding: 2px 6px;
+      box-shadow: var(--kbd-shadow);
+      color: var(--fg-default);
+      white-space: nowrap;
+      vertical-align: middle;
+    }
+
+    /* CODE — markdown fence / file blob */
+    .code-block {
+      margin-top: 0.75rem;
+      border-radius: var(--radius);
+      overflow: hidden;
+      border: 1px solid var(--border-default);
+    }
+
+    .code-head {
+      background: var(--canvas-subtle);
+      border-bottom: 1px solid var(--border-default);
+      padding: 0.4375rem 0.625rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-family: var(--font-mono);
+      font-size: 0.6875rem;
+      color: var(--fg-muted);
+      min-height: 2rem;
+    }
+
+    .dots {
+      display: flex;
+      gap: 4px;
+      margin-right: 2px;
+      opacity: 0.65;
+    }
+
+    .dots span {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--dots-neutral);
+    }
+
+    .dots span:nth-child(1) { background: #ff8182; }
+    .dots span:nth-child(2) { background: #d4a72c; }
+    .dots span:nth-child(3) { background: #54ae32; }
+
+    .code-head > span:nth-of-type(2) {
+      flex: 1;
+      text-align: left;
+    }
+
+    .copy-btn {
+      background: var(--canvas-default);
+      border: 1px solid var(--border-default);
+      border-radius: var(--radius);
+      color: var(--fg-default);
+      font-family: var(--font-sans);
+      font-size: 0.75rem;
+      font-weight: 500;
+      padding: 0.1875rem 0.625rem;
+      line-height: 1.25;
+      cursor: pointer;
+      transition: background 0.12s ease, border-color 0.12s ease;
+      box-shadow: var(--kbd-shadow);
+    }
+
+    .copy-btn:hover {
+      background: var(--canvas-subtle);
+      border-color: var(--border-default);
+    }
+
+    .copy-btn:active {
+      background: var(--btn-active-bg);
+    }
+
+    .copy-btn.copied {
+      color: var(--success-fg);
+      border-color: var(--success-border);
+      background: var(--success-muted);
+    }
+
+    .copy-btn.copied:hover {
+      background: var(--btn-copied-hover-bg);
+    }
+
+    .code-body {
+      background: var(--code-bg);
+      padding: 0.75rem 0.875rem;
+      display: flex;
+      align-items: flex-start;
+      gap: 0.5rem;
+      overflow-x: auto;
+    }
+
+    .prompt {
+      color: var(--fg-muted);
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      user-select: none;
+      flex-shrink: 0;
+      line-height: 1.45;
+    }
+
+    code {
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      line-height: 1.45;
+      color: var(--code-text);
+      word-break: break-all;
+    }
+
+    /* ABOUT */
+    .about-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.75rem;
+      margin-top: 0.875rem;
+    }
+
+    .feature {
+      background: var(--canvas-subtle);
+      border-radius: var(--radius);
+      padding: 0.75rem;
+      border: 1px solid var(--border-default);
+    }
+
+    .feature h3 {
+      font-size: 0.8125rem;
+      font-weight: 600;
+      margin-bottom: 0.25rem;
+      color: var(--fg-default);
+    }
+
+    .feature p {
+      font-size: 0.75rem;
+      color: var(--fg-muted);
+      line-height: 1.5;
+    }
+
+    .lead {
+      font-size: 0.875rem;
+      color: var(--fg-muted);
+      line-height: 1.65;
+    }
+
+    .lead + .lead {
+      margin-top: 0.625rem;
+    }
+
+    /* SPECS */
+    .specs {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0;
+    }
+
+    .specs > div {
+      padding: 0.5rem 0;
+      border-bottom: 1px solid var(--border-default);
+      display: flex;
+      flex-direction: column;
+      gap: 0.125rem;
+    }
+
+    .specs > div:nth-last-child(-n+2) {
+      border-bottom: none;
+    }
+
+    .specs dt {
+      font-size: 0.75rem;
+      color: var(--fg-muted);
+      font-weight: 400;
+    }
+
+    .specs dd {
+      font-size: 0.8125rem;
+      font-weight: 500;
+      font-family: var(--font-mono);
+      color: var(--fg-default);
+    }
+
+    .tag-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.375rem;
+      margin-top: 1rem;
+      padding-top: 0.75rem;
+      border-top: 1px solid var(--border-default);
+    }
+
+    .tag {
+      background: var(--canvas-default);
+      border: 1px solid var(--border-default);
+      border-radius: 2rem;
+      padding: 0.25rem 0.625rem;
+      font-size: 0.75rem;
+      font-family: var(--font-mono);
+      color: var(--accent-fg);
+    }
+
+    .tag:hover {
+      background: var(--canvas-subtle);
+      border-color: var(--border-default);
+    }
+
+    /* NOTE — alert / callout */
+    .note {
+      border-left: 4px solid var(--accent-fg);
+      background: var(--note-bg);
+      border-radius: var(--radius);
+      padding: 0.625rem 0.875rem;
+      font-size: 0.8125rem;
+      color: var(--fg-default);
+      margin-top: 0.875rem;
+      line-height: 1.5;
+    }
+
+    .note a { color: var(--accent-fg); }
+
+    @media (max-width: 480px) {
+      .about-grid { grid-template-columns: 1fr; }
+      .specs { grid-template-columns: 1fr; }
+      .specs > div:nth-last-child(-n+2) { border-bottom: 1px solid var(--border-default); }
+      .specs > div:last-child { border-bottom: none; }
+    }
+  </style>
+</head>
+<body>
+
+  <section class="hero">
+    <div class="hero-icon">
+      <img src="icon.png" alt="window-memory" />
+    </div>
+    <h1>window-memory</h1>
+    <p class="hero-tagline">macOS · Utility · Homebrew install</p>
+  </section>
+
+  <div class="wrap">
+
+    <section class="panel" id="install" aria-labelledby="install-title">
+      <div class="panel-head">
+        <h2 id="install-title">Installation Guide</h2>
+        <p>Step-by-step installation via Terminal</p>
+      </div>
+      <div class="panel-body">
+        <ol class="steps">
+
+          <li class="step">
+            <span class="step-num cmd" aria-hidden="true">⌘</span>
+            <div>
+              <h3>Open Terminal</h3>
+              <p>Press <kbd>⌘</kbd> + <kbd>Space</kbd> to open Spotlight, type <strong>Terminal</strong> and press <kbd>Enter</kbd>.</p>
+            </div>
+          </li>
+
+          <li class="step">
+            <span class="step-num" aria-hidden="true">2</span>
+            <div>
+              <h3>Install window-memory</h3>
+              <p>Paste this command and press <kbd>Enter</kbd>. Homebrew will download and install the app — you may be prompted for your Mac password.</p>
+              <div class="code-block" data-copy-as="gggg">
+                <div class="code-head">
+                  <span class="dots" aria-hidden="true"><span></span><span></span><span></span></span>
+                  <span>Terminal — Install window-memory</span>
+                  <button type="button" class="copy-btn">Copy</button>
+                </div>
+                <div class="code-body">
+                  <span class="prompt">$</span>
+                  <code>brew install --cask window-memory</code>
+                </div>
+              </div>
+              <p class="note">On first launch macOS may ask for Accessibility permission — this is required to read and restore window positions.</p>
+            </div>
+          </li>
+
+          <li class="step">
+            <span class="step-num done" aria-hidden="true">✓</span>
+            <div>
+              <h3>Done</h3>
+              <p>When the command finishes, open <strong>window-memory</strong> from Applications or Spotlight (<kbd>⌘</kbd> + <kbd>Space</kbd>). Arrange your windows — the app saves the layout automatically.</p>
+            </div>
+          </li>
+
+        </ol>
+      </div>
+    </section>
+
+    <section class="panel" id="about" aria-labelledby="about-title">
+      <div class="panel-head">
+        <h2 id="about-title">About this app</h2>
+      </div>
+      <div class="panel-body">
+        <p class="lead">window-memory saves your window layout per monitor configuration and restores it automatically when that configuration is detected again.</p>
+        <p class="lead">No more repositioning windows every time you connect or disconnect an external display.</p>
+        <div class="about-grid">
+          <div class="feature">
+            <h3>Per-monitor layouts</h3>
+            <p>Saves separately for each combination of displays you use.</p>
+          </div>
+          <div class="feature">
+            <h3>Auto-restore</h3>
+            <p>Detects display changes and restores positions without any input.</p>
+          </div>
+          <div class="feature">
+            <h3>Menu bar</h3>
+            <p>Save or restore manually from the menu bar icon at any time.</p>
+          </div>
+          <div class="feature">
+            <h3>No cloud</h3>
+            <p>Everything stored locally. No account, no tracking, no network.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="panel" id="information" aria-labelledby="info-title">
+      <div class="panel-head">
+        <h2 id="info-title">Information</h2>
+      </div>
+      <div class="panel-body">
+        <dl class="specs">
+          <div><dt>Version</dt><dd>1.0.0</dd></div>
+          <div><dt>Compatibility</dt><dd>macOS 13.0+</dd></div>
+          <div><dt>Category</dt><dd>Utility</dd></div>
+          <div><dt>License</dt><dd>MIT</dd></div>
+          <div><dt>Price</dt><dd>Free</dd></div>
+        </dl>
+        <div class="tag-row">
+          <span class="tag">window-management</span>
+          <span class="tag">menu-bar</span>
+          <span class="tag">multi-monitor</span>
+          <span class="tag">productivity</span>
+        </div>
+      </div>
+    </section>
+
+  </div>
+
+  <script>
+    function copyTextFromBlock(btn) {
+      var block = btn.closest('[data-copy-as]');
+      return (block && block.getAttribute('data-copy-as')) || '';
+    }
+
+    document.querySelectorAll('.copy-btn').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        var text = copyTextFromBlock(btn);
+        if (!text) return;
+        navigator.clipboard.writeText(text).then(function () {
+          btn.classList.add('copied');
+          btn.textContent = 'Copied!';
+          setTimeout(function () {
+            btn.classList.remove('copied');
+            btn.textContent = 'Copy';
+          }, 2000);
+        });
+      });
+    });
+
+    document.addEventListener('copy', function (e) {
+      var sel = window.getSelection();
+      if (!sel || !sel.rangeCount || sel.isCollapsed) return;
+      var range = sel.getRangeAt(0);
+      var root = range.commonAncestorContainer;
+      var el = root.nodeType === Node.ELEMENT_NODE ? root : root.parentElement;
+      if (!el || !el.closest) return;
+      var block = el.closest('[data-copy-as]');
+      if (!block || !block.contains(root)) return;
+      var text = block.getAttribute('data-copy-as');
+      if (!text) return;
+      e.preventDefault();
+      e.clipboardData.setData('text/plain', text);
+    });
+  </script>
+
+</body>
+</html>
